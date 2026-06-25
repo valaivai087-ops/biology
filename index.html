@@ -1,0 +1,1084 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BioMap 生命地圖 OS</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #647084;
+      --paper: #f6f8fb;
+      --panel: #ffffff;
+      --line: #dce3ee;
+      --soft: #f1f5f9;
+      --green: #17a879;
+      --teal: #149bb1;
+      --amber: #f2a51d;
+      --red: #e65d73;
+      --blue: #3f76d6;
+      --violet: #7560d8;
+      --shadow: 0 18px 45px rgba(23, 32, 51, .12);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(120deg, rgba(20,155,177,.10), rgba(242,165,29,.08)),
+        var(--paper);
+    }
+
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      background: #101828;
+      color: white;
+      padding: 22px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+
+    .brand {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      background: conic-gradient(from 120deg, var(--green), var(--teal), var(--amber), var(--green));
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      color: #07131b;
+    }
+
+    .brand h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
+    .brand p { margin: 2px 0 0; color: #b7c2d4; font-size: 13px; }
+
+    .mission {
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      border-radius: 8px;
+      padding: 14px;
+      line-height: 1.65;
+      font-size: 14px;
+      color: #e8eef8;
+    }
+
+    .mission strong {
+      color: #a8f0d4;
+      display: block;
+      font-size: 16px;
+    }
+
+    .nav { display: grid; gap: 8px; }
+    .nav a,
+    .nav button {
+      width: 100%;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #d8e0ed;
+      text-align: left;
+      padding: 10px 12px;
+      display: grid;
+      grid-template-columns: 24px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .nav a:hover,
+    .nav button.active,
+    .nav button:hover {
+      background: rgba(255,255,255,.12);
+      color: white;
+    }
+
+    .badge {
+      color: #101828;
+      background: #a8f0d4;
+      border-radius: 999px;
+      padding: 2px 7px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .stats {
+      margin-top: auto;
+      display: grid;
+      gap: 10px;
+      color: #cdd7e6;
+      font-size: 13px;
+    }
+
+    .bar {
+      height: 8px;
+      background: rgba(255,255,255,.12);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      width: 68%;
+      background: linear-gradient(90deg, var(--green), var(--amber));
+    }
+
+    main {
+      padding: 26px;
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 50px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .topbar p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      max-width: 760px;
+      line-height: 1.7;
+    }
+
+    .search {
+      width: min(340px, 34vw);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      box-shadow: 0 8px 22px rgba(24,33,47,.06);
+    }
+
+    .search input {
+      border: 0;
+      outline: 0;
+      min-width: 0;
+      width: 100%;
+      background: transparent;
+    }
+
+    .section {
+      margin-top: 22px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .section-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      background: #fbfcfe;
+    }
+
+    .section-head h3 { margin: 0; font-size: 21px; }
+    .section-head p { margin: 5px 0 0; color: var(--muted); line-height: 1.55; }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 18px;
+      padding: 18px;
+    }
+
+    .map-board {
+      min-height: 640px;
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(rgba(63,118,214,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(63,118,214,.08) 1px, transparent 1px),
+        #fff;
+      background-size: 42px 42px;
+      overflow: hidden;
+    }
+
+    .route {
+      position: absolute;
+      inset: 70px 70px 84px;
+      border: 4px solid rgba(20,155,177,.24);
+      border-left-color: transparent;
+      border-bottom-color: rgba(242,165,29,.42);
+      border-radius: 45% 42% 35% 44%;
+      transform: rotate(-4deg);
+    }
+
+    .map-node {
+      position: absolute;
+      width: 178px;
+      border: 1px solid var(--line);
+      border-left: 7px solid var(--green);
+      border-radius: 8px;
+      background: rgba(255,255,255,.96);
+      box-shadow: 0 12px 28px rgba(24,33,47,.10);
+      padding: 12px;
+      text-align: left;
+      transition: transform .2s, box-shadow .2s, border-color .2s;
+    }
+
+    .map-node:hover,
+    .map-node.active {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 34px rgba(24,33,47,.16);
+      border-color: var(--teal);
+    }
+
+    .map-node b { display: block; font-size: 16px; }
+    .map-node small { display: block; color: var(--muted); margin-top: 5px; line-height: 1.35; }
+    .n1 { left: 5%; top: 8%; } .n2 { left: 34%; top: 5%; }
+    .n3 { right: 6%; top: 13%; } .n4 { right: 10%; top: 39%; }
+    .n5 { left: 42%; top: 45%; } .n6 { left: 7%; top: 42%; }
+    .n7 { left: 14%; bottom: 11%; } .n8 { left: 46%; bottom: 8%; }
+    .n9 { right: 6%; bottom: 13%; }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 16px;
+    }
+
+    .panel h4 { margin: 0 0 12px; font-size: 18px; }
+    .panel p { margin: 0; color: var(--muted); line-height: 1.6; }
+
+    .learning-flow {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .learning-flow span {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 8px;
+      align-items: center;
+      padding: 9px;
+      background: #f5f8fc;
+      border-radius: 8px;
+      border: 1px solid #e8edf5;
+    }
+
+    .learning-flow i {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #e1f7ee;
+      color: #08754f;
+      font-style: normal;
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    .detail-grid {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: .95fr 1.05fr;
+      gap: 18px;
+    }
+
+    .mindmap {
+      position: relative;
+      min-height: 330px;
+      border: 1px solid var(--line);
+      background: #fbfcfe;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .mind-line {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 38%;
+      height: 2px;
+      background: var(--line);
+      transform-origin: left center;
+    }
+
+    .mind-center,
+    .mind-branch {
+      position: absolute;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: white;
+      box-shadow: 0 10px 22px rgba(23,32,51,.08);
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    .mind-center {
+      left: 50%;
+      top: 50%;
+      width: 148px;
+      min-height: 80px;
+      transform: translate(-50%, -50%);
+      display: grid;
+      place-items: center;
+      padding: 12px;
+      font-size: 20px;
+      font-weight: 900;
+      color: white;
+      background: #172033;
+      z-index: 2;
+    }
+
+    .mind-branch {
+      width: 132px;
+      min-height: 64px;
+      padding: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 800;
+      z-index: 3;
+    }
+
+    .b0 { left: 49%; top: 8%; transform: translateX(-50%); }
+    .b1 { right: 7%; top: 26%; }
+    .b2 { right: 9%; bottom: 20%; }
+    .b3 { left: 49%; bottom: 6%; transform: translateX(-50%); }
+    .b4 { left: 8%; bottom: 20%; }
+    .b5 { left: 7%; top: 26%; }
+
+    .mechanism {
+      display: grid;
+      gap: 10px;
+    }
+
+    .mech-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .mech-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+      padding: 12px;
+      min-height: 92px;
+    }
+
+    .mech-box label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 7px;
+      font-weight: 800;
+    }
+
+    .mech-box strong {
+      display: block;
+      line-height: 1.45;
+    }
+
+    .memory {
+      margin-top: 12px;
+      border-left: 5px solid var(--amber);
+      background: #fff8e8;
+      border-radius: 8px;
+      padding: 12px;
+      line-height: 1.65;
+      font-weight: 800;
+    }
+
+    .ai-grid {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+      gap: 18px;
+    }
+
+    .topic-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .topic-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .topic-card strong { font-size: 16px; }
+    .topic-card span { color: var(--muted); line-height: 1.55; }
+
+    .subject-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .subject-tabs button,
+    .next-btn,
+    .select {
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 8px;
+      padding: 9px 11px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .subject-tabs button.active,
+    .next-btn {
+      background: #101828;
+      color: white;
+      border-color: #101828;
+    }
+
+    .anki-toolbar,
+    .exam-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+
+    .anki-grid {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .anki-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+      background: white;
+      min-height: 150px;
+      display: grid;
+      align-content: start;
+      gap: 9px;
+    }
+
+    .card-type {
+      justify-self: start;
+      border-radius: 999px;
+      background: #e8f6f8;
+      color: #0b6978;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .anki-card strong { line-height: 1.45; }
+    .anki-card small { color: var(--muted); line-height: 1.5; }
+
+    .exam-grid {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 420px minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .cluster-map {
+      min-height: 390px;
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+      overflow: hidden;
+    }
+
+    .cluster {
+      position: absolute;
+      width: 148px;
+      min-height: 74px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: white;
+      padding: 10px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-weight: 900;
+      box-shadow: 0 10px 22px rgba(23,32,51,.08);
+    }
+
+    .cluster.center {
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: #172033;
+      color: white;
+      z-index: 2;
+    }
+
+    .c1 { left: 50%; top: 8%; transform: translateX(-50%); }
+    .c2 { right: 7%; top: 40%; }
+    .c3 { left: 50%; bottom: 8%; transform: translateX(-50%); }
+    .c4 { left: 7%; top: 40%; }
+
+    .exam-list {
+      display: grid;
+      gap: 10px;
+      max-height: 620px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .exam-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      padding: 13px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .exam-card h4 {
+      margin: 0 0 6px;
+      font-size: 16px;
+    }
+
+    .exam-card p {
+      margin: 0 0 8px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .weight {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(var(--green) var(--deg), #e8edf5 var(--deg) 360deg);
+      font-weight: 900;
+    }
+
+    .mini-mech {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .mini-mech span {
+      background: #f6f8fb;
+      border: 1px solid #e8edf5;
+      border-radius: 8px;
+      padding: 7px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 1180px) {
+      .dashboard, .ai-grid, .detail-grid, .exam-grid { grid-template-columns: 1fr; }
+      .anki-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 860px) {
+      .app { display: block; }
+      .sidebar { position: static; height: auto; }
+      .topbar, .section-head, .anki-toolbar, .exam-toolbar { display: grid; }
+      .search { width: 100%; }
+      .map-board { min-height: 780px; }
+      .map-node { width: 42%; }
+      .n1 { left: 5%; top: 4%; } .n2 { right: 5%; left: auto; top: 10%; }
+      .n3 { left: 5%; right: auto; top: 23%; } .n4 { right: 5%; top: 31%; }
+      .n5 { left: 5%; top: 45%; } .n6 { right: 5%; left: auto; top: 52%; }
+      .n7 { left: 5%; bottom: 19%; } .n8 { right: 5%; left: auto; bottom: 11%; }
+      .n9 { left: 29%; right: auto; bottom: 1.5%; }
+      .mech-row, .mini-mech { grid-template-columns: 1fr 1fr; }
+      .anki-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 560px) {
+      main { padding: 16px; }
+      .map-board { min-height: 920px; }
+      .map-node { width: 90%; left: 5% !important; right: auto !important; }
+      .n1 { top: 2%; } .n2 { top: 12%; } .n3 { top: 22%; }
+      .n4 { top: 32%; } .n5 { top: 42%; } .n6 { top: 52%; }
+      .n7 { top: 62%; bottom: auto; } .n8 { top: 72%; bottom: auto; }
+      .n9 { top: 82%; bottom: auto; }
+      .mindmap { min-height: 520px; }
+      .mind-line { display: none; }
+      .mind-center { top: 10%; }
+      .mind-branch { left: 50% !important; right: auto !important; transform: translateX(-50%) !important; }
+      .b0 { top: 25%; } .b1 { top: 37%; } .b2 { top: 49%; bottom: auto; }
+      .b3 { top: 61%; bottom: auto; } .b4 { top: 73%; bottom: auto; } .b5 { top: 85%; }
+      .mech-row, .mini-mech, .anki-grid { grid-template-columns: 1fr; }
+      .exam-card { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">Bio</div>
+        <div>
+          <h1>BioMap</h1>
+          <p>國中也聽得懂的生命地圖 OS</p>
+        </div>
+      </div>
+
+      <div class="mission">
+        <strong>不要背課本</strong>
+        用國中程度的白話講生物：先看圖，再聽懂，再背起來，最後會拿去解題。
+      </div>
+
+      <nav class="nav" id="nav"></nav>
+      <nav class="nav">
+        <a href="#ai-os"><span>AI</span><span>AI 學霸系統</span><span class="badge">OS</span></a>
+        <a href="#anki-os"><span>卡</span><span>Anki OS</span><span class="badge">500</span></a>
+        <a href="#exam-os"><span>考</span><span>考試導航 OS</span><span class="badge">80</span></a>
+      </nav>
+
+      <div class="stats">
+        <div>目前稱號：生物王候選人</div>
+        <div class="bar"><span></span></div>
+        <div>XP 4,080 / 6,000 · 今日已完成 36 張卡</div>
+      </div>
+    </aside>
+
+    <main>
+      <section class="topbar">
+        <div>
+          <h2>生命地圖 Dashboard</h2>
+          <p>每個地圖節點都用視覺心智圖呈現，並補上「前面發生什麼 → 中間怎麼做 → 最後變怎樣 → 跟身體有什麼關係」。學生不用先輸入資料，打開就直接看到整理好的學習路線。</p>
+        </div>
+        <label class="search" aria-label="搜尋生命地圖">
+          <span>⌕</span>
+          <input id="search" placeholder="搜尋：粒線體、DNA、抗體..." />
+        </label>
+      </section>
+
+      <section class="section" id="dashboard">
+        <div class="section-head">
+          <div>
+            <h3>Dashboard：節點式生命導航</h3>
+            <p>點選任一王國，立即切換心智圖、機制圖、背誦秘訣與考點方向。</p>
+          </div>
+          <span class="badge">視覺心智圖</span>
+        </div>
+        <div class="dashboard">
+          <div class="map-board" id="lifeMap">
+            <div class="route"></div>
+          </div>
+          <aside class="panel">
+            <h4>學習公式</h4>
+            <p>細胞 → DNA → RNA → 蛋白質 → 細胞功能 → 組織 → 器官 → 生命系統</p>
+            <div class="learning-flow" id="mainFlow"></div>
+          </aside>
+        </div>
+        <div class="detail-grid" id="detail"></div>
+      </section>
+
+      <section class="section" id="ai-os">
+        <div class="section-head">
+          <div>
+            <h3>AI 學霸系統</h3>
+            <p>直接輸出所有重點：中心節點心智圖、機制圖、背誦秘訣與整理好的考試內容。</p>
+          </div>
+          <span class="badge">免輸入</span>
+        </div>
+        <div class="ai-grid">
+          <div class="panel">
+            <h4>中心節點 + 分支節點</h4>
+            <div class="mindmap" id="aiMindmap"></div>
+          </div>
+          <div class="topic-stack" id="aiTopics"></div>
+        </div>
+      </section>
+
+      <section class="section" id="anki-os">
+        <div class="section-head">
+          <div>
+            <h3>Anki OS</h3>
+            <p>每科自動產出 500 張 Anki 卡，可切換科目，每次顯示 12 張，按下一組繼續練。</p>
+          </div>
+          <span class="badge">17 類卡片</span>
+        </div>
+        <div class="anki-toolbar">
+          <div class="subject-tabs" id="ankiSubjects"></div>
+          <button class="next-btn" id="nextAnki">下一組</button>
+        </div>
+        <div class="anki-grid" id="ankiGrid"></div>
+      </section>
+
+      <section class="section" id="exam-os">
+        <div class="section-head">
+          <div>
+            <h3>考試導航 OS</h3>
+            <p>每科保留 80 個考點，用 4 大節點式心智圖群組呈現，並完整列出考點、背誦秘訣、機制圖與考點權重。</p>
+          </div>
+          <span class="badge">80 考點</span>
+        </div>
+        <div class="exam-toolbar">
+          <div class="subject-tabs" id="examSubjects"></div>
+          <select class="select" id="examGroup">
+            <option value="all">全部群組</option>
+            <option value="核心地圖">核心地圖</option>
+            <option value="機制推理">機制推理</option>
+            <option value="臨床應用">臨床應用</option>
+            <option value="考前輸出">考前輸出</option>
+          </select>
+        </div>
+        <div class="exam-grid">
+          <div class="cluster-map" id="examMindmap"></div>
+          <div class="exam-list" id="examList"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const subjects = ["普通生物", "細胞生物", "分子生物", "遺傳學", "免疫學", "演化生態"];
+    const cardTypes = ["定義", "核心問題", "機制", "結構", "考點", "記憶", "對比", "臨床", "易錯", "輸出", "圖像", "排序", "Boss", "英文", "錯題", "考前", "整合"];
+    const groups = ["核心地圖", "機制推理", "臨床應用", "考前輸出"];
+
+    const worlds = [
+      {
+        id: "overview", icon: "圖", title: "生命總地圖", subtitle: "先看全貌，再學細節", node: "生命層級",
+        branches: ["化學元素", "生物分子", "細胞", "器官系統", "個體", "生態系"],
+        mechanism: ["元素與分子", "組成細胞結構", "形成組織器官", "理解疾病與生態問題"],
+        simple: "一句話聽懂：生命不是突然出現的，它是一層一層堆起來的。",
+        memory: "最好背法：把生命想成積木。小積木是元素，拼成分子，再拼成細胞，最後拼成一個完整生物。",
+        useTip: "運用秘訣：題目問你是哪一層，就先想它是「東西、細胞、器官、整個生物，還是一群生物」。",
+        focus: "考題常考：把名詞放到正確層級，還有問你上下層之間怎麼連起來。"
+      },
+      {
+        id: "cell", icon: "胞", title: "細胞王國", subtitle: "細胞膜、細胞核、粒線體", node: "細胞",
+        branches: ["細胞膜", "細胞核", "粒線體", "核糖體", "內質網", "高基氏體"],
+        mechanism: ["葡萄糖與氧氣進入", "粒線體進行呼吸作用", "產生 ATP", "影響肌肉、神經與代謝疾病"],
+        simple: "一句話聽懂：細胞就像一座小城市，每個胞器都有自己的工作。",
+        memory: "最好背法：把細胞想成一座城市。細胞膜是城牆，細胞核是市長室，粒線體是發電廠，核糖體是工廠。",
+        useTip: "運用秘訣：看到胞器題，先問自己「它在城市裡負責什麼工作」，功能就會跳出來。",
+        focus: "考題常考：胞器配功能、哪個胞器壞掉會怎樣、真核細胞和原核細胞差在哪。"
+      },
+      {
+        id: "dna", icon: "DNA", title: "DNA 王國", subtitle: "DNA 到蛋白質的生命指令", node: "DNA",
+        branches: ["基因", "複製", "轉錄", "RNA", "轉譯", "蛋白質"],
+        mechanism: ["DNA 序列", "轉錄成 mRNA", "核糖體轉譯", "蛋白質改變細胞功能與表現型"],
+        simple: "一句話聽懂：DNA 像生命的說明書，告訴細胞要做出什麼東西。",
+        memory: "最好背法：DNA 是總說明書，RNA 是影印本，蛋白質是照著說明書做出來的工具。",
+        useTip: "運用秘訣：看到 DNA 題，就畫一條線：DNA → RNA → 蛋白質 → 性狀，答案通常就在這條線上。",
+        focus: "考題常考：中心法則、轉錄和轉譯差在哪、突變會怎麼影響蛋白質。"
+      },
+      {
+        id: "protein", icon: "酵", title: "蛋白質王國", subtitle: "把基因指令變成功能", node: "蛋白質",
+        branches: ["酵素", "激素", "抗體", "結構蛋白", "運輸蛋白", "受體"],
+        mechanism: ["胺基酸序列", "摺疊成特定構形", "結合受質或訊號", "產生代謝、免疫、運輸功能"],
+        simple: "一句話聽懂：蛋白質就是身體真正拿來做事的工具。",
+        memory: "最好背法：蛋白質就是生命工具箱。酵素負責加速，抗體負責認敵人，血紅素負責搬氧氣。",
+        useTip: "運用秘訣：看到蛋白質題，先判斷它是哪一種工具，再想這個工具壞掉會造成什麼結果。",
+        focus: "考題常考：蛋白質形狀、酵素怎麼加速反應、蛋白質變性後為什麼不能用。"
+      },
+      {
+        id: "genetics", icon: "遺", title: "遺傳王國", subtitle: "用故事模式理解孟德爾", node: "遺傳",
+        branches: ["孟德爾", "染色體", "顯性", "隱性", "基因型", "表現型"],
+        mechanism: ["親代等位基因", "減數分裂分離", "受精重新組合", "子代表現型比例改變"],
+        simple: "一句話聽懂：遺傳就是父母把生命說明書的一部分傳給小孩。",
+        memory: "最好背法：基因型像劇本，表現型像演出。顯性聲音大，一份就看得到；隱性要兩份才看得到。",
+        useTip: "運用秘訣：遇到遺傳題先寫父母基因，再畫格子，不要靠感覺猜比例。",
+        focus: "考題常考：顯性隱性、基因型和表現型、家族譜、帶因者機率。"
+      },
+      {
+        id: "immune", icon: "免", title: "免疫王國", subtitle: "像戰爭遊戲一樣看防禦", node: "免疫",
+        branches: ["病原體", "先天免疫", "發炎", "抗原呈現", "T 細胞", "B 細胞"],
+        mechanism: ["病原體入侵", "先天免疫啟動發炎", "抗原呈現活化淋巴球", "抗體與記憶細胞建立保護"],
+        simple: "一句話聽懂：免疫就是身體辨認敵人、攻擊敵人、記住敵人的防衛系統。",
+        memory: "最好背法：免疫像保衛戰。先天免疫是第一道警報，T 細胞像指揮官，B 細胞會做抗體。",
+        useTip: "運用秘訣：看到免疫題，先判斷是「先擋住」還是「認出特定敵人」，就能分先天和後天免疫。",
+        focus: "考題常考：先天和後天差異、T 細胞和 B 細胞分工、疫苗為什麼有效。"
+      },
+      {
+        id: "evolution", icon: "演", title: "演化王國", subtitle: "用生命故事看變化", node: "演化",
+        branches: ["突變", "變異", "天擇", "適應", "族群", "物種形成"],
+        mechanism: ["族群產生變異", "環境造成選汰壓力", "有利性狀比例上升", "族群逐代演化"],
+        simple: "一句話聽懂：演化不是一隻生物突然變強，而是一群生物慢慢變得不一樣。",
+        memory: "最好背法：突變負責出新版本，環境負責挑版本，留下來的版本越來越多就是演化。",
+        useTip: "運用秘訣：看到演化題，記得不是個體自己變強，而是族群裡某些特徵的人活下來比較多。",
+        focus: "考題常考：天擇條件、抗藥性怎麼來、族群變小後基因比例改變。"
+      },
+      {
+        id: "flow", icon: "流", title: "生命流程圖", subtitle: "每章自動生成流程", node: "細胞呼吸",
+        branches: ["葡萄糖", "糖解作用", "丙酮酸", "TCA 循環", "電子傳遞鏈", "ATP"],
+        mechanism: ["葡萄糖分解", "電子載體攜帶能量", "質子梯度形成", "ATP 合成供應細胞功能"],
+        simple: "一句話聽懂：細胞呼吸就是把食物裡的能量變成細胞能用的電池。",
+        memory: "最好背法：細胞呼吸像把葡萄糖拿去發電。三站要記：糖解、TCA、電子傳遞鏈，最後拿到 ATP。",
+        useTip: "運用秘訣：看到呼吸作用題，先問「在哪裡、用什麼、產生什麼」，位置和產物最常出題。",
+        focus: "考題常考：每一站在哪裡、氧氣做什麼、ATP 從哪一段大量產生。"
+      },
+      {
+        id: "ecology", icon: "生", title: "生態王國", subtitle: "從個體到生態系", node: "生態",
+        branches: ["個體", "族群", "群集", "生態系", "能量流", "物質循環"],
+        mechanism: ["環境資源限制", "族群互動改變", "能量沿食物鏈流動", "影響生物多樣性與公共衛生"],
+        simple: "一句話聽懂：生態就是生物和生物、生物和環境之間的關係網。",
+        memory: "最好背法：生態就是一張關係網。誰吃誰、誰搶資源、能量往哪裡流，就是重點。",
+        useTip: "運用秘訣：看到生態題，先畫箭頭。箭頭通常代表能量從誰流到誰，方向不要畫反。",
+        focus: "考題常考：食物鏈食物網、族群變多變少、競爭捕食共生、能量塔。"
+      }
+    ];
+
+    const learningFlow = ["細胞", "DNA", "RNA", "蛋白質", "細胞功能", "組織", "器官", "生命系統"];
+    let activeId = "cell";
+    let ankiSubject = subjects[0];
+    let ankiPage = 0;
+    let examSubject = subjects[0];
+
+    function makeMindmap(container, center, branches) {
+      const angles = [-90, -30, 35, 90, 145, 210];
+      container.innerHTML = branches.map((_, index) => `<div class="mind-line" style="transform: rotate(${angles[index] || 0}deg)"></div>`).join("") +
+        `<div class="mind-center">${center}</div>` +
+        branches.slice(0, 6).map((branch, index) => `<div class="mind-branch b${index}">${branch}</div>`).join("");
+    }
+
+    function renderNav() {
+      const nav = document.getElementById("nav");
+      nav.innerHTML = worlds.map((world, index) => `
+        <button class="${world.id === activeId ? "active" : ""}" data-id="${world.id}">
+          <span>${world.icon}</span><span>${world.title}</span><span class="badge">${index + 1}</span>
+        </button>
+      `).join("");
+      nav.querySelectorAll("button").forEach(button => button.addEventListener("click", () => selectWorld(button.dataset.id)));
+    }
+
+    function renderMap(items = worlds) {
+      const map = document.getElementById("lifeMap");
+      map.querySelectorAll(".map-node").forEach(node => node.remove());
+      items.forEach(world => {
+        const index = worlds.indexOf(world) + 1;
+        const button = document.createElement("button");
+        button.className = `map-node n${index} ${world.id === activeId ? "active" : ""}`;
+        button.dataset.id = world.id;
+        button.innerHTML = `<b>${world.title}</b><small>${world.simple}</small>`;
+        button.addEventListener("click", () => selectWorld(world.id));
+        map.appendChild(button);
+      });
+    }
+
+    function renderLearningFlow() {
+      document.getElementById("mainFlow").innerHTML = learningFlow.map((item, index) => `<span><i>${index + 1}</i>${item}</span>`).join("");
+    }
+
+    function renderMechanism(mechanism) {
+      const labels = ["前面發生什麼", "中間怎麼做", "最後變怎樣", "跟身體有什麼關係"];
+      return `<div class="mechanism"><div class="mech-row">
+        ${labels.map((label, index) => `<div class="mech-box"><label>${label}</label><strong>${mechanism[index]}</strong></div>`).join("")}
+      </div></div>`;
+    }
+
+    function renderDetail() {
+      const world = worlds.find(item => item.id === activeId);
+      const detail = document.getElementById("detail");
+      detail.innerHTML = `
+        <div class="panel">
+          <h4>${world.title}：視覺心智圖</h4>
+          <div class="mindmap" id="detailMindmap"></div>
+        </div>
+        <div class="panel">
+          <h4>${world.node} 機制圖</h4>
+          <p>${world.simple}</p>
+          ${renderMechanism(world.mechanism)}
+          <div class="memory">最讚背法：${world.memory}</div>
+          <div class="memory" style="border-left-color: var(--teal); background:#eaf8fb">運用秘訣：${world.useTip}</div>
+          <div class="memory" style="border-left-color: var(--blue); background:#eef4ff">考題會這樣考：${world.focus}</div>
+        </div>
+      `;
+      makeMindmap(document.getElementById("detailMindmap"), world.node, world.branches);
+    }
+
+    function renderAiOS() {
+      const topics = [
+        worlds[1], worlds[2], worlds[3], worlds[5]
+      ];
+      makeMindmap(document.getElementById("aiMindmap"), "普通生物", ["細胞功能", "DNA 指令", "蛋白質執行", "遺傳傳遞", "免疫防禦", "演化生態"]);
+      document.getElementById("aiTopics").innerHTML = topics.map(topic => `
+        <article class="topic-card">
+          <strong>${topic.title}重點整理</strong>
+          <span>${topic.simple}</span>
+          <span>${topic.focus}</span>
+          ${renderMechanism(topic.mechanism)}
+          <span><b>最讚背法：</b>${topic.memory}</span>
+          <span><b>運用秘訣：</b>${topic.useTip}</span>
+        </article>
+      `).join("");
+    }
+
+    function buildAnkiCards(subject) {
+      const base = worlds.flatMap(world => world.branches.map(branch => ({ world, branch })));
+      return Array.from({ length: 500 }, (_, index) => {
+        const source = base[index % base.length];
+        const type = cardTypes[index % cardTypes.length];
+        return {
+          no: index + 1,
+          type,
+          q: `${subject}｜${type}卡 ${index + 1}：${source.branch} 和「${source.world.node}」的關係是什麼？`,
+          a: `${source.world.simple} ${source.branch} 是 ${source.world.title} 的核心節點。最讚背法：${source.world.memory} 運用秘訣：${source.world.useTip}`
+        };
+      });
+    }
+
+    function renderSubjectTabs(containerId, active, onClick) {
+      const box = document.getElementById(containerId);
+      box.innerHTML = subjects.map(subject => `<button class="${subject === active ? "active" : ""}" data-subject="${subject}">${subject}</button>`).join("");
+      box.querySelectorAll("button").forEach(button => button.addEventListener("click", () => onClick(button.dataset.subject)));
+    }
+
+    function renderAnki() {
+      renderSubjectTabs("ankiSubjects", ankiSubject, subject => {
+        ankiSubject = subject;
+        ankiPage = 0;
+        renderAnki();
+      });
+      const cards = buildAnkiCards(ankiSubject);
+      const start = (ankiPage * 12) % cards.length;
+      const visible = cards.slice(start, start + 12);
+      document.getElementById("ankiGrid").innerHTML = visible.map(card => `
+        <article class="anki-card">
+          <span class="card-type">${card.type}</span>
+          <strong>${card.q}</strong>
+          <small>${card.a}</small>
+        </article>
+      `).join("");
+      document.getElementById("nextAnki").textContent = `下一組 (${start + 1}-${start + visible.length} / 500)`;
+    }
+
+    function buildExamPoints(subject) {
+      return Array.from({ length: 80 }, (_, index) => {
+        const world = worlds[index % worlds.length];
+        const group = groups[index % groups.length];
+        const branch = world.branches[index % world.branches.length];
+        const weight = 55 + ((index * 7) % 41);
+        return {
+          no: index + 1,
+          group,
+          title: `${subject}考點 ${index + 1}：${branch}`,
+          summary: `${world.simple} ${world.title}高頻觀念：${world.focus}`,
+          memory: world.memory,
+          useTip: world.useTip,
+          mechanism: world.mechanism,
+          weight
+        };
+      });
+    }
+
+    function renderExamMindmap() {
+      document.getElementById("examMindmap").innerHTML = `
+        <div class="mind-line" style="transform: rotate(-90deg)"></div>
+        <div class="mind-line" style="transform: rotate(0deg)"></div>
+        <div class="mind-line" style="transform: rotate(90deg)"></div>
+        <div class="mind-line" style="transform: rotate(180deg)"></div>
+        <div class="cluster center">考試導航<br>${examSubject}</div>
+        <div class="cluster c1">核心地圖<br>20 題</div>
+        <div class="cluster c2">機制推理<br>20 題</div>
+        <div class="cluster c3">臨床應用<br>20 題</div>
+        <div class="cluster c4">考前輸出<br>20 題</div>
+      `;
+    }
+
+    function renderExam() {
+      renderSubjectTabs("examSubjects", examSubject, subject => {
+        examSubject = subject;
+        renderExam();
+      });
+      renderExamMindmap();
+      const filter = document.getElementById("examGroup").value;
+      const points = buildExamPoints(examSubject).filter(point => filter === "all" || point.group === filter);
+      document.getElementById("examList").innerHTML = points.map(point => `
+        <article class="exam-card">
+          <div>
+            <h4>${point.no}. ${point.title}</h4>
+            <p>${point.summary}</p>
+            <p><b>最讚背法：</b>${point.memory}</p>
+            <p><b>運用秘訣：</b>${point.useTip}</p>
+          </div>
+          <div class="weight" title="考點權重" style="--deg:${point.weight * 3.6}deg">${point.weight}</div>
+          <div class="mini-mech">
+            <span><b>前面</b><br>${point.mechanism[0]}</span>
+            <span><b>中間</b><br>${point.mechanism[1]}</span>
+            <span><b>結果</b><br>${point.mechanism[2]}</span>
+            <span><b>身體</b><br>${point.mechanism[3]}</span>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function selectWorld(id) {
+      activeId = id;
+      renderNav();
+      renderMap();
+      renderDetail();
+    }
+
+    document.getElementById("search").addEventListener("input", event => {
+      const keyword = event.target.value.trim().toLowerCase();
+      const filtered = keyword
+        ? worlds.filter(world => [world.title, world.subtitle, world.node, world.memory, world.focus, ...world.branches, ...world.mechanism].join(" ").toLowerCase().includes(keyword))
+        : worlds;
+      renderMap(filtered);
+    });
+
+    document.getElementById("nextAnki").addEventListener("click", () => {
+      ankiPage += 1;
+      renderAnki();
+    });
+    document.getElementById("examGroup").addEventListener("change", renderExam);
+
+    renderNav();
+    renderMap();
+    renderLearningFlow();
+    renderDetail();
+    renderAiOS();
+    renderAnki();
+    renderExam();
+  </script>
+</body>
+</html>
